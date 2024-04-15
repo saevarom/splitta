@@ -25,7 +25,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "homepage": "/splitta/build",
+  "homepage": "https://saevarom.github.io/splitta/build",
   "eslintConfig": {
     "extends": [
       "react-app",
