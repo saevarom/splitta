@@ -20,9 +20,11 @@ import {
   SimpleGrid,
   Stack,
   Text,
+  useColorMode,
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react'
+import { MoonIcon, SunIcon } from '@chakra-ui/icons'
 import { participants1, transactions1 } from './fixtures/test'
 import Splitt, { precisionRound } from './splitt'
 import {
@@ -45,6 +47,8 @@ function App() {
 
   const [participants, _setParticipants] = useState(JSON.parse(localStorage.getItem('participants')) || [])
   const [transactions, _setTransactions] = useState(JSON.parse(localStorage.getItem('transactions')) || [])
+
+  const { colorMode, toggleColorMode } = useColorMode()
 
   const [editingParticipants, setEditingParticipants] = useState(false)
   const [editingTransactions, setEditingTransactions] = useState(false)
@@ -266,7 +270,7 @@ function App() {
                     ))}
                   </ul>
                 }
-                <Icon as={FcPlus} w={5} h={5} onClick={() => newTransactionModal()} />
+                {participants.length > 0 && <Icon as={FcPlus} w={5} h={5} onClick={() => newTransactionModal()} />}
               </Text>
             </Stack>
             <Stack>
@@ -309,7 +313,12 @@ function App() {
           <Icon as={FcDoughnutChart} w={20} h={20} />
           <Text>© 2024 Splitta.is</Text>
           <Stack direction={'row'} spacing={6}>
-            <Text><Icon as={FcFullTrash} w={10} h={10} onClick={handleClearAll}/></Text>>
+            <span onClick={toggleColorMode}>
+              {colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
+            </span>
+            <Text>
+              <Icon as={FcFullTrash} w={10} h={10} onClick={handleClearAll} />
+            </Text>>
           </Stack>
         </Container>
       </Box>
