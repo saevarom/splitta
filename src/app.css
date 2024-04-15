@@ -1,0 +1,13 @@
+body,
+div#root,
+div#root>div {
+    min-height: 100vh;
+}
+
+#footer {
+    height: 112px;
+}
+
+#content {
+    min-height: calc(100vh - 112px);
+}

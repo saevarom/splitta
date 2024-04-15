@@ -1,0 +1,17 @@
+version: '3'
+
+volumes:
+  node_modules:
+services:
+  web:
+    build: .
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: npm run start
+    # command: tail -f /dev/null
+    volumes:
+      - .:/code
+      - ~/.ssh/id_rsa:/root/.ssh/id_rsa
+      - node_modules:/code/node_modules/
+    ports:
+      - 3000:3000
