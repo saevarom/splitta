@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/splitta/build/static/css/main.ac8e0827.css",
-    "main.js": "/splitta/build/static/js/main.9d78f40c.js",
-    "static/js/453.e73117c5.chunk.js": "/splitta/build/static/js/453.e73117c5.chunk.js",
-    "index.html": "/splitta/build/index.html",
-    "main.ac8e0827.css.map": "/splitta/build/static/css/main.ac8e0827.css.map",
-    "main.9d78f40c.js.map": "/splitta/build/static/js/main.9d78f40c.js.map",
-    "453.e73117c5.chunk.js.map": "/splitta/build/static/js/453.e73117c5.chunk.js.map"
+    "main.css": "/static/css/main.ac8e0827.css",
+    "main.js": "/static/js/main.b3ca27e7.js",
+    "static/js/453.e73117c5.chunk.js": "/static/js/453.e73117c5.chunk.js",
+    "index.html": "/index.html",
+    "main.ac8e0827.css.map": "/static/css/main.ac8e0827.css.map",
+    "main.b3ca27e7.js.map": "/static/js/main.b3ca27e7.js.map",
+    "453.e73117c5.chunk.js.map": "/static/js/453.e73117c5.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.ac8e0827.css",
-    "static/js/main.9d78f40c.js"
+    "static/js/main.b3ca27e7.js"
   ]
 }
