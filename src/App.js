@@ -44,7 +44,7 @@ import {
   FcTodoList,
   FcSettings,
   FcPlus,
-  FcLock,
+  FcQuestions,
   FcCancel,
   FcDoughnutChart,
   FcFullTrash,
@@ -321,7 +321,7 @@ function App() {
             <Stack p="4" boxShadow="lg" m="4" borderRadius="sm">
               <Stack direction="row" alignItems="center">
                 <Text fontWeight="semibold">Hvernig virkar þetta?</Text>
-                <FcLock />
+                <FcQuestions />
               </Stack>
 
               <Stack direction="row" justifyContent="space-between">
