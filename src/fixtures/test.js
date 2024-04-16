@@ -35,3 +35,14 @@ export const transactions2 = [
     {title: 'Skylmingar Völundur', amount: 2250, participants: [1, 2, 3, 4, 5, 6, 7, 8, 9], paidBy: 2},
     {title: 'Skylmingar hálfur tími', amount: 2250, participants: [5, 7], paidBy: 2},
 ]
+
+export const participants3 = [
+    {name: 'Jói', id: 1},
+    {name: 'Sigga', id: 2},
+    {name: 'Gunni', id: 3},
+]
+
+export const transactions3 = [
+    {title: 'Matur', amount: 10000, participants: [1, 2, 3], paidBy: 2},
+    {title: 'Bensín', amount: 5000, participants: [1, 2], paidBy: 1},
+]

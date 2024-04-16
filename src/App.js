@@ -1,8 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { ChevronDownIcon } from '@chakra-ui/icons'
 import {
   Box,
   Button,
+  Checkbox,
+  CheckboxGroup,
   Container,
   Flex,
   FormControl,
@@ -17,15 +19,24 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTrigger,
   SimpleGrid,
   Stack,
   Text,
+  useCheckboxGroup,
   useColorMode,
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react'
 import { MoonIcon, SunIcon } from '@chakra-ui/icons'
-import { participants1, transactions1 } from './fixtures/test'
+import { participants2, transactions2 } from './fixtures/test'
+import { participants3, transactions3 } from './fixtures/test'
 import Splitt, { precisionRound } from './splitt'
 import {
   FcConferenceCall,
@@ -33,15 +44,18 @@ import {
   FcTodoList,
   FcSettings,
   FcPlus,
+  FcLock,
   FcCancel,
   FcDoughnutChart,
   FcFullTrash,
 } from "react-icons/fc";
 import './app.css';
+import TransactionForm from './TransactionForm'
 
 import { formatMoney } from './utils'
 
 window.splitt = null
+
 
 function App() {
 
@@ -68,8 +82,7 @@ function App() {
   }, [participants, transactions])
 
   const participantName = useRef('')
-  const transactionTitle = useRef('')
-  const transactionAmount = useRef('')
+
 
   const setParticipants = (participants) => {
     localStorage.setItem('participants', JSON.stringify(participants))
@@ -91,16 +104,21 @@ function App() {
   }
 
   const removeParticipant = (id) => {
+    const newTransactions = transactions.map((t) => {
+      return { ...t, participants: t.participants.filter(p => p !== id) }
+    })
     const newList = participants.filter(p => p.id !== id)
+
+    setTransactions(newTransactions)
     setParticipants(newList)
   }
-  const addTransaction = (title, amount) => {
+  const addTransaction = (title, amount, involvedParticipants, paidBy) => {
     setEditingTransactions(false)
     let id = 1
     if (transactions.length > 0) {
       id = Math.max(...transactions.map(p => p.id)) + 1
     }
-    setTransactions([...transactions, { paidBy: participants[0].id, title, amount, participants: participants.map(p => p.id), id: id }])
+    setTransactions([...transactions, { paidBy: +paidBy, title, amount, participants: involvedParticipants, id: id }])
   }
 
   const removeTransaction = (id) => {
@@ -160,22 +178,7 @@ function App() {
       modalContent: (
         <>
           <ModalBody>
-            <Stack spacing={4}>
-              <form id="new-transaction"
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  addTransaction(transactionTitle.current.value, transactionAmount.current.value)
-                  onClose()
-                }} >
-                <FormControl>
-                  <Text>Skýring</Text>
-                  <Input ref={transactionTitle} placeholder="Skýring" />
-                  <Text>Upphæð</Text>
-                  <Input ref={transactionAmount} placeholder="Upphæð" />
-                </FormControl>
-              </form>
-            </Stack>
-
+            <TransactionForm participants={participants} addTransaction={addTransaction} onClose={onClose} />
           </ModalBody>
 
           <ModalFooter>
@@ -254,7 +257,8 @@ function App() {
                 <Icon as={FcMoneyTransfer} w={10} h={10} />
               </Flex>
               <Text fontWeight={600}>Kostnaður <Icon as={FcSettings} w={3} h={3} onClick={() => setEditingTransactions(!editingTransactions)} /></Text>
-              <Text color={'gray.600'}>
+              <Text color='gray.600'>Samtals {formatMoney(splitt.total, 0)} kr.</Text>
+              <Text>
                 {editingTransactions ?
                   <ul>
                     {transactions.map(transaction => (
@@ -266,7 +270,21 @@ function App() {
                   :
                   <ul>
                     {transactions.map(transaction => (
-                      <li>{transaction.title} ({formatMoney(transaction.amount)})</li>
+                      <Popover trigger="hover">
+                        <PopoverTrigger>
+                          <li>{transaction.title} ({formatMoney(transaction.amount)})</li>
+                        </PopoverTrigger>
+                        <PopoverContent>
+                          <PopoverArrow />
+                          <PopoverCloseButton />
+                          <PopoverHeader>{transaction.title}</PopoverHeader>
+                          <PopoverBody>
+                            {participants.find(p => p.id === transaction.paidBy).name} greiddi {formatMoney(transaction.amount)} kr.
+                            <hr />
+                            {transaction.participants.map(tId => participants.find(p => p.id === tId).name).join(', ')} tóku þátt.
+                          </PopoverBody>
+                        </PopoverContent>
+                      </Popover>
                     ))}
                   </ul>
                 }
@@ -296,6 +314,36 @@ function App() {
             </Stack>
           </SimpleGrid>
         </Container>
+
+        <Container maxW={'6xl'} mt={10}>
+          <SimpleGrid columns="1" spacing={10}>
+
+            <Stack p="4" boxShadow="lg" m="4" borderRadius="sm">
+              <Stack direction="row" alignItems="center">
+                <Text fontWeight="semibold">Hvernig virkar þetta?</Text>
+                <FcLock />
+              </Stack>
+
+              <Stack direction="row" justifyContent="space-between">
+                <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
+                  Bættu þátttakendum við og skráðu kostnaðarliði. Þegar þú ert búinn að skrá allt getur þú séð hvernig á að skipta kostnaðinum á milli þátttakenda í dálknum lengst til hægri.<br />
+                  Smelltu á hnappinn hér til hægri til að hlaða inn litlu dæmi. Þú getur alltaf notað ruslatunnuna í fætinum til að hreinsa allt og byrja upp á nýtt. <br />
+                  Það er óhætt að loka eða endurhlaða síðunni, gögnin eru vistuð í vafranum þínum.
+                </Text>
+                <Stack direction="column">
+                  <Button colorScheme="green" onClick={() => {
+                    setParticipants(participants3)
+                    setTransactions(transactions3)
+                  }}>
+                    Dæmi
+                  </Button>
+                  <Button colorScheme="red" onClick={handleClearAll}>Hreinsa</Button>
+                </Stack>
+              </Stack>
+            </Stack>
+          </SimpleGrid>
+        </Container>
+
       </Box>
 
       <Box
