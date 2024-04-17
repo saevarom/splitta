@@ -29,11 +29,13 @@ import {
 import {
   IoMdCloseCircle
 } from "react-icons/io";
-import './app.css';
-import EventForm from './EventForm'
 
+import EventForm from './EventForm'
 import Event from './Event';
 import EventList from './EventList';
+import { participants3, transactions3 } from './fixtures/test';
+
+import './app.css';
 
 const createEvent = (title, participants = [], transactions = []) => {
   return {
@@ -68,6 +70,10 @@ const App = () => {
   const saveEvent = (event) => {
     events[events.indexOf(events.find(e => e.uuid === event.uuid))] = event
     setEvents(events)
+  }
+
+  const deleteEvent = (event) => {
+    setEvents(events.filter(e => e.uuid !== event.uuid))
   }
 
   const addEvent = (event) => {
@@ -137,7 +143,7 @@ const App = () => {
                 </Button>
               </SimpleGrid>
             </Container>
-            <EventList events={events} selectEvent={selectEvent} />
+            <EventList events={events} selectEvent={selectEvent} deleteEvent={deleteEvent} />
           </>
         }
 
@@ -152,17 +158,23 @@ const App = () => {
 
               <Stack direction="row" justifyContent="space-between">
                 <Text fontSize={{ base: 'sm' }} textAlign={'left'} maxW={'4xl'}>
+                  Stofnaðu nýjan viðburð með því að smella á hnappinn hér að ofan (Nýr viðburður). <br />
                   Bættu þátttakendum við og skráðu kostnaðarliði. Þegar þú ert búinn að skrá allt getur þú séð hvernig á að skipta kostnaðinum á milli þátttakenda í dálknum lengst til hægri.<br />
                   Smelltu á hnappinn hér til hægri til að hlaða inn litlu dæmi. Þú getur alltaf notað ruslatunnuna í fætinum til að hreinsa allt og byrja upp á nýtt. <br />
                   Það er óhætt að loka eða endurhlaða síðunni, gögnin eru vistuð í vafranum þínum.
                 </Text>
                 <Stack direction="column">
-                  {/* <Button colorScheme="green" onClick={() => {
-                    setParticipants(participants3)
-                    setTransactions(transactions3)
-                  }}> */}
-                  {/* Dæmi
-                  </Button> */}
+                  <Button colorScheme="green" onClick={() => {
+                    let newEvent = createEvent(
+                      'Dæmi',
+                      participants3,
+                      transactions3
+                    )
+                    addEvent(newEvent)
+                    selectEvent(newEvent)
+                  }}>
+                  Dæmi
+                  </Button>
                   {/* <Button colorScheme="red" onClick={handleClearAll}>Hreinsa</Button> */}
                 </Stack>
               </Stack>
