@@ -1,42 +1,23 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { ChevronDownIcon } from '@chakra-ui/icons'
+import React, { useState, useRef } from 'react'
 import {
-    Box,
-    Button,
     Checkbox,
     CheckboxGroup,
-    Container,
-    Flex,
     FormControl,
-    Heading,
-    HStack,
-    Icon,
+    FormErrorMessage,
     Input,
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalFooter,
-    ModalBody,
-    ModalCloseButton,
     Select,
-    SimpleGrid,
     Stack,
     Text,
-    useCheckboxGroup,
-    useColorMode,
-    useColorModeValue,
-    useDisclosure,
 } from '@chakra-ui/react'
-
 
 const TransactionForm = ({ participants, addTransaction, onClose }) => {
 
     const [activeValues, setActiveValues] = useState(participants.map(p => p.id) || [])
     const transactionTitle = useRef('')
     const transactionAmount = useRef('')
-
     const [paidBy, setPaidBy] = useState(null)
+    const paidByError = paidBy === null || paidBy === undefined || (+paidBy) === 0
+    const isError = paidByError
 
     const handleSelect = (e) => {
         setPaidBy(e.target.value)
@@ -46,9 +27,11 @@ const TransactionForm = ({ participants, addTransaction, onClose }) => {
         <Stack spacing={4}>
             <form id="new-transaction"
                 onSubmit={(e) => {
-                    e.preventDefault()
-                    addTransaction(transactionTitle.current.value, transactionAmount.current.value, activeValues, paidBy)
-                    onClose()
+                    if (!isError) {
+                        e.preventDefault()
+                        addTransaction(transactionTitle.current.value, transactionAmount.current.value, activeValues, paidBy)
+                        onClose()
+                    }
                 }} >
                 <FormControl>
                     <Text>Skýring</Text>
@@ -72,6 +55,7 @@ const TransactionForm = ({ participants, addTransaction, onClose }) => {
                                     <option value={participant.id}>{participant.name}</option>
                                 )}
                             </Select>
+                            {paidByError && <FormErrorMessage>Veldu greiðanda</FormErrorMessage>}
                         </>
                     }
                 </FormControl>
