@@ -1,6 +1,6 @@
 body,
 div#root,
-div#root>div {
+div#root>div:not(.reactour__popover) {
     min-height: 100vh;
 }
 
@@ -10,4 +10,21 @@ div#root>div {
 
 #content {
     min-height: calc(100vh - 112px);
+}
+
+.main-content {
+    border-radius: var(--chakra-radii-md);
+}
+
+.chakra-heading.title:hover {
+    text-decoration: underline;
+}
+
+.event-list-item {
+    cursor: pointer;
+}
+
+ul > li {
+    list-style-type: none;
+    
 }

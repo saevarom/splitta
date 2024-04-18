@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import {
     Checkbox,
     CheckboxGroup,
@@ -13,11 +13,15 @@ import {
 const TransactionForm = ({ participants, addTransaction, onClose }) => {
 
     const [activeValues, setActiveValues] = useState(participants.map(p => p.id) || [])
-    const transactionTitle = useRef('')
-    const transactionAmount = useRef('')
+    
+    const [touched, setTouched] = useState(false)
     const [paidBy, setPaidBy] = useState(null)
+    const [amountValue, setAmountValue] = useState(null)
+    const [titleValue, setTitleValue] = useState(null)
     const paidByError = paidBy === null || paidBy === undefined || (+paidBy) === 0
-    const isError = paidByError
+    const amountError = touched && (parseInt(amountValue) === 0 || amountValue === '' || isNaN(parseInt(amountValue)))
+    const activeValuesError = activeValues.length === 0
+    const isError = paidByError || amountError || activeValuesError
 
     const handleSelect = (e) => {
         setPaidBy(e.target.value)
@@ -27,21 +31,26 @@ const TransactionForm = ({ participants, addTransaction, onClose }) => {
         <Stack spacing={4}>
             <form id="new-transaction"
                 onSubmit={(e) => {
+                    e.preventDefault()
                     if (!isError) {
-                        e.preventDefault()
-                        addTransaction(transactionTitle.current.value, transactionAmount.current.value, activeValues, paidBy)
+                        addTransaction(titleValue, amountValue, activeValues, paidBy)
                         onClose()
                     }
                 }} >
-                <FormControl>
+                <FormControl isRequired mb={3}>
                     <Text>Skýring</Text>
-                    <Input ref={transactionTitle} placeholder="Skýring" />
+                    <Input placeholder="Skýring" value={titleValue} onChange={(e) => setTitleValue(e.target.value)}/>
+                </FormControl>
+                <FormControl isRequired isInvalid={amountError} mb={3}>
                     <Text>Upphæð</Text>
-                    <Input ref={transactionAmount} placeholder="Upphæð" />
-                    <Text>Hverjir tóku þátt í þessum kostnaðarlið?</Text>
-                    {participants.length > 0 &&
-                        <>
-                            <CheckboxGroup colorScheme='green' value={activeValues} onChange={setActiveValues}>
+                    <Input placeholder="Upphæð" value={amountValue} onChange={(e) => {setTouched(true);setAmountValue(e.target.value)}} />
+                    {amountError && <FormErrorMessage>Upphæð er ógild</FormErrorMessage>}
+                </FormControl>
+                {participants.length > 0 &&
+                    <>
+                        <FormControl isInvalid={activeValuesError} mb={3}>
+                            <Text>Hverjir tóku þátt í þessum kostnaðarlið?</Text>
+                            <CheckboxGroup colorScheme='green' value={activeValues} onChange={(e) => setActiveValues(e.map(p => parseInt(p)))}>
                                 <Stack spacing={[1, 5]} direction={['column', 'row']}>
                                     {participants.map(participant =>
                                         <Checkbox isChecked={activeValues.includes(participant.id)} value={participant.id}>
@@ -50,15 +59,18 @@ const TransactionForm = ({ participants, addTransaction, onClose }) => {
                                     )}
                                 </Stack>
                             </CheckboxGroup>
+                            {activeValuesError && <FormErrorMessage>Veldu a.m.k. einn þátttakanda.</FormErrorMessage>}
+                        </FormControl>
+                        <FormControl isInvalid={paidByError}>
                             <Select placeholder="Hver greiddi?" onChange={handleSelect}>
                                 {participants.map(participant =>
                                     <option value={participant.id}>{participant.name}</option>
                                 )}
                             </Select>
                             {paidByError && <FormErrorMessage>Veldu greiðanda</FormErrorMessage>}
-                        </>
-                    }
-                </FormControl>
+                        </FormControl>
+                    </>
+                }
             </form>
         </Stack>
     )

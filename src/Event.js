@@ -22,6 +22,7 @@ import {
     PopoverHeader,
     PopoverTrigger,
     SimpleGrid,
+    Spacer,
     Stack,
     Text,
     useDisclosure,
@@ -30,18 +31,23 @@ import Splitt, { precisionRound } from './splitt'
 import {
     FcConferenceCall,
     FcMoneyTransfer,
+    FcCheckmark,
     FcTodoList,
     FcSettings,
     FcPlus,
     FcCancel,
 } from "react-icons/fc";
+import {
+    IoMdCloseCircle
+} from "react-icons/io";
+
 import './app.css';
 import TransactionForm from './TransactionForm'
 
 import { formatMoney } from './utils'
 
 
-const Event = ({ currentEvent, saveEvent }) => {
+const Event = ({ currentEvent, saveEvent, unselectEvent }) => {
 
     const [participants, _setParticipants] = useState(currentEvent.participants || [])
     const [transactions, _setTransactions] = useState(currentEvent.transactions || [])
@@ -49,7 +55,10 @@ const Event = ({ currentEvent, saveEvent }) => {
     const [editingTransactions, setEditingTransactions] = useState(false)
     const [modalProps, setModalProps] = useState({})
     const { isOpen, onOpen, onClose } = useDisclosure()
+    const [editingTitle, setEditingTitle] = useState(false)
+    const [titleValue, setTitleValue] = useState(currentEvent.title)
     const participantName = useRef('')
+    const title = useRef('')
 
     let splitt = new Splitt(participants, transactions);
     useEffect(() => {
@@ -156,25 +165,63 @@ const Event = ({ currentEvent, saveEvent }) => {
         onOpen()
     }
 
+    const onDoubleClickHandler = () => {
+        setEditingTitle(true)
+    }
+
     return (
-        <Container maxW={'6xl'} mt={10}>
-            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10}>
+        <>
+            {/* <SimpleGrid columns="1" spacing={10}>
                 <Heading>
                     {currentEvent.title} <Text as={'span'} fontSize='sm' color='gray.600' >Samtals {formatMoney(splitt.total, 0)} kr.</Text>
                 </Heading>
+            </SimpleGrid> */}
+
+            <SimpleGrid columns="1" spacing={10}>
+                <Flex>
+                    <Heading className="title" onDoubleClick={onDoubleClickHandler}>
+                        {editingTitle ?
+                            <form onSubmit={(e) => {
+                                e.preventDefault()
+                                currentEvent.title = title.current.value
+                                saveEvent(currentEvent)
+                                setEditingTitle(false)
+                            }}>
+                                <Flex>
+                                    <Input ref={title} value={titleValue} onChange={(e) => setTitleValue(e.target.value)} />
+                                    <Button type="submit" colorScheme='green' variant='outline' ms={3} mr={3} ><Icon as={FcCheckmark} w={5} h={5} /></Button>
+                                </Flex>
+                            </form>
+                            :
+                            <>
+                                {currentEvent.title}
+                            </>
+                        }
+                    </Heading>
+                    <Spacer />
+                    <Stack>
+                        <Button onClick={unselectEvent}>
+                            <Icon as={IoMdCloseCircle} w={5} h={5} />
+                        </Button>
+
+                    </Stack>
+                </Flex>
             </SimpleGrid>
-            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10}>
-                <Stack>
-                    <Flex
-                        w={16}
-                        h={16}
-                        align={'center'}
-                        justify={'center'}
-                        color={'white'}
-                        rounded={'full'}
-                        bg={'gray.100'}
-                        mb={1}>
-                        <Icon as={FcConferenceCall} w={10} h={10} />
+
+            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10} bg='gray.100' className="main-content" p="4">
+                <Stack className="box-participants">
+                    <Flex justify={'center'}>
+                        <Flex
+                            w={16}
+                            h={16}
+                            align={'center'}
+                            justify={'center'}
+                            color={'white'}
+                            rounded={'full'}
+                            bg={'white'}
+                            mb={1}>
+                            <Icon as={FcConferenceCall} w={10} h={10} />
+                        </Flex>
                     </Flex>
                     <Text fontWeight={600}>Þátttakendur <Icon as={FcSettings} w={3} h={3} onClick={() => setEditingParticipants(!editingParticipants)} /></Text>
                     <Text color={'gray.600'}>
@@ -194,17 +241,19 @@ const Event = ({ currentEvent, saveEvent }) => {
                         <Icon as={FcPlus} w={5} h={5} onClick={() => newParticipantModal()} />
                     </Text>
                 </Stack>
-                <Stack>
-                    <Flex
-                        w={16}
-                        h={16}
-                        align={'center'}
-                        justify={'center'}
-                        color={'white'}
-                        rounded={'full'}
-                        bg={'gray.100'}
-                        mb={1}>
-                        <Icon as={FcMoneyTransfer} w={10} h={10} />
+                <Stack className="box-transactions">
+                    <Flex justify={'center'}>
+                        <Flex
+                            w={16}
+                            h={16}
+                            align={'center'}
+                            justify={'center'}
+                            color={'white'}
+                            rounded={'full'}
+                            bg={'white'}
+                            mb={1}>
+                            <Icon as={FcMoneyTransfer} w={10} h={10} />
+                        </Flex>
                     </Flex>
                     <Text fontWeight={600}>Kostnaður <Icon as={FcSettings} w={3} h={3} onClick={() => setEditingTransactions(!editingTransactions)} /></Text>
                     <Text>
@@ -240,17 +289,19 @@ const Event = ({ currentEvent, saveEvent }) => {
                         {participants.length > 0 && <Icon as={FcPlus} w={5} h={5} onClick={() => newTransactionModal()} />}
                     </Text>
                 </Stack>
-                <Stack>
-                    <Flex
-                        w={16}
-                        h={16}
-                        align={'center'}
-                        justify={'center'}
-                        color={'white'}
-                        rounded={'full'}
-                        bg={'gray.100'}
-                        mb={1}>
-                        <Icon as={FcTodoList} w={10} h={10} />
+                <Stack className="box-result">
+                    <Flex justify={'center'}>
+                        <Flex
+                            w={16}
+                            h={16}
+                            align={'center'}
+                            justify={'center'}
+                            color={'white'}
+                            rounded={'full'}
+                            bg={'white'}
+                            mb={1}>
+                            <Icon as={FcTodoList} w={10} h={10} />
+                        </Flex>
                     </Flex>
                     <Text fontWeight={600}>Uppgjör</Text>
                     <Text color={'gray.600'}>
@@ -271,7 +322,7 @@ const Event = ({ currentEvent, saveEvent }) => {
                     {modalProps.modalContent}
                 </ModalContent>
             </Modal>
-        </Container>
+        </>
     )
 }
 export default Event;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Box,
   Button,
@@ -13,7 +13,6 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
-  SimpleGrid,
   Stack,
   Text,
   useColorMode,
@@ -26,14 +25,12 @@ import {
   FcQuestions,
   FcDoughnutChart,
 } from "react-icons/fc";
-import {
-  IoMdCloseCircle
-} from "react-icons/io";
 
 import EventForm from './EventForm'
 import Event from './Event';
 import EventList from './EventList';
 import { participants3, transactions3 } from './fixtures/test';
+import { useTour } from '@reactour/tour'
 
 import './app.css';
 
@@ -53,6 +50,30 @@ const App = () => {
   const [modalProps, setModalProps] = useState({})
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { colorMode, toggleColorMode } = useColorMode()
+  const { isOpen: isTourOpen, currentStep, steps, setIsOpen, setCurrentStep, setSteps } = useTour()
+  const [dirty, setDirty] = useState(Math.random())
+
+  useEffect(() => {
+    console.log('currentStep', currentStep)
+    if (currentStep === 0 && events.length > 0 && isTourOpen) {
+      setCurrentStep(1)
+    }
+    if (currentStep === 1 && selectedEvent && isTourOpen) {
+      setCurrentStep(2)
+    }
+    if (currentStep === 2 && selectedEvent === null && isTourOpen) {
+      setSelectedEvent(events[0])
+    }
+    if (isTourOpen && currentStep === 7 && selectedEvent && selectedEvent.transactions.length === 0 && selectedEvent.participants.length === 0) {
+      console.log("jamm jamm")
+      let newEvent = Object.assign({}, selectedEvent)
+      newEvent.participants = participants3
+      newEvent.transactions = transactions3
+      setSelectedEvent(newEvent)
+      saveEvent(newEvent)
+      setDirty(Math.random())
+    }
+  }, [currentStep, events, selectedEvent, isTourOpen])
 
   const setEvents = (events) => {
     localStorage.setItem('events', JSON.stringify(events))
@@ -109,7 +130,7 @@ const App = () => {
     <Box>
       <Box p={4} id="content">
 
-        <Stack spacing={4} as={Container} maxW={'3xl'} textAlign={'center'}>
+        <Stack spacing={4} as={Container} maxW={'3xl'} textAlign={'center'} mb={10}>
           <HStack>
 
             <Icon as={FcDoughnutChart} w={20} h={20} />
@@ -126,28 +147,15 @@ const App = () => {
           </HStack>
         </Stack>
 
-        {selectedEvent ?
-          <>
-            <Button onClick={unselectEvent}>
-              <Icon as={IoMdCloseCircle} w={5} h={5} />
-            </Button>
+        <Stack spacing={4} as={Container} maxW={'3xl'}>
+          {selectedEvent ?
+            <Event key={dirty} currentEvent={selectedEvent} saveEvent={saveEvent} unselectEvent={unselectEvent}/>
+            :
+            <EventList events={events} selectEvent={selectEvent} deleteEvent={deleteEvent} newEventModal={newEventModal} />
+          }
+        </Stack>
 
-            <Event currentEvent={selectedEvent} saveEvent={saveEvent} />
-          </>
-          :
-          <>
-            <Container maxW={'6xl'} mt={10}>
-              <SimpleGrid columns="1" spacing={10}>
-                <Button onClick={() => newEventModal()}>
-                  <Icon as={FcPlus} w={5} h={5} /> &nbsp;Nýr viðburður
-                </Button>
-              </SimpleGrid>
-            </Container>
-            <EventList events={events} selectEvent={selectEvent} deleteEvent={deleteEvent} />
-          </>
-        }
-
-        <Container maxW={'6xl'} mt={10}>
+        {/* <Container maxW={'6xl'} mt={10}>
           <SimpleGrid columns="1" spacing={10}>
 
             <Stack p="4" boxShadow="lg" m="4" borderRadius="sm">
@@ -175,12 +183,13 @@ const App = () => {
                   }}>
                   Dæmi
                   </Button>
-                  {/* <Button colorScheme="red" onClick={handleClearAll}>Hreinsa</Button> */}
+                  <Button colorScheme="blue" onClick={() => setIsOpen(true)}>Skoðunarferð</Button>
+                  <Button colorScheme="red" onClick={handleClearAll}>Hreinsa</Button>
                 </Stack>
               </Stack>
             </Stack>
           </SimpleGrid>
-        </Container>
+        </Container> */}
 
       </Box>
 
@@ -199,6 +208,18 @@ const App = () => {
           <Icon as={FcDoughnutChart} w={20} h={20} />
           <Text>© 2024 Splitta.is</Text>
           <Stack direction={'row'} spacing={6}>
+          <Button className="example-button" colorScheme="green" onClick={() => {
+                    let newEvent = createEvent(
+                      'Dæmi',
+                      participants3,
+                      transactions3
+                    )
+                    addEvent(newEvent)
+                    selectEvent(newEvent)
+                  }}>
+                  Dæmi
+                  </Button>
+            <Button colorScheme="blue" variant="outline" onClick={() => setIsOpen(true)}><FcQuestions /> &nbsp;Hvernig virkar?</Button>
             <span onClick={toggleColorMode}>
               {colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
             </span>
@@ -219,7 +240,7 @@ const App = () => {
         </ModalContent>
       </Modal>
 
-    </Box>
+    </Box >
   );
 }
 
