@@ -198,6 +198,10 @@ const Event = ({ currentEvent, saveEvent, unselectEvent }) => {
                             </>
                         }
                     </Heading>
+                    <Heading>
+                        <Text ms={10} as={'span'} fontSize='sm' color='gray.600' >Samtals {formatMoney(splitt.total, 0)} kr.</Text>
+                    </Heading>
+                    <Spacer />
                     <Spacer />
                     <Stack>
                         <Button onClick={unselectEvent}>
